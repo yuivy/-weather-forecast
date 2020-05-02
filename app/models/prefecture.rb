@@ -1,4 +1,5 @@
 class Prefecture < ApplicationRecord
+  has_many :users
   # enum prefecture: { 0: Hokkaido, 1: Aomori, 2: Iwate, 3: Miyagi, 4: Akita, 5: Yamagata, 6: Fukushima,
   #   7: Ibaraki, 8: Tochigi, 9: Gunma, 10: Saitama, 11: Chiba, 12: Tokyo, 13: Kanagawa,
   #   14: Niigata, 15: Toyama, 16: Ishikawa,17: Fukui, 18: Yamanashi, 19: Nagano,
