@@ -8,6 +8,7 @@ class LinebotController < ApplicationController
   protect_from_forgery :except => [:callback]
 
   def callback
+    @line_client = Service::LineClient.new
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
@@ -27,28 +28,28 @@ class LinebotController < ApplicationController
           case @message #送信されたメッセージに応じて分岐させる
 
           when "北海道,東北"
-            message = Service::LineClient.second_reply_hokkaido_tohoku
+            message = @line_client.second_reply_hokkaido_tohoku
             client.reply_message(event['replyToken'], message)
           when "関東"
-            message = Service::LineClient.second_reply_kanto
+            message = @line_client.second_reply_kanto
             client.reply_message(event['replyToken'], message)
           when "北陸,甲信越"
-            message = Service::LineClient.second_reply_hokuriku_koushinetsu
+            message = @line_client.second_reply_hokuriku_koushinetsu
             client.reply_message(event['replyToken'], message)
           when "東海,関西"
-            message = Service::LineClient.second_reply_tokai_kansai
+            message = @line_client.second_reply_tokai_kansai
             client.reply_message(event['replyToken'], message)
           when "中国,四国"
-            message = Service::LineClient.second_reply_chugoku_shikoku
+            message = @line_client.second_reply_chugoku_shikoku
             client.reply_message(event['replyToken'], message)
           when "九州,沖縄"
-            message = Service::LineClient.second_reply_kyusyu_okinawa
+            message = @line_client.second_reply_kyusyu_okinawa
             client.reply_message(event['replyToken'], message)
 
           # Prefectureモデルに該当するメッセージの場合に反応する
           when *prefectures.pluck(:name)
             prefecture = Prefecture.find_by(name: @message)
-            message = Service::LineClient.third_reply(prefecture.name)
+            message = @line_client.third_reply(prefecture.name)
             client.reply_message(event['replyToken'], message) 
                       
             line_id = event['source']['userId']
@@ -60,7 +61,7 @@ class LinebotController < ApplicationController
             end
 
           else
-            message = Service::LineClient.first_reply
+            message = @line_client.first_reply
             client.reply_message(event['replyToken'], message)
           end
 
