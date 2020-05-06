@@ -141,10 +141,10 @@ class LinebotController < ApplicationController
         line_id = event['source']['userId']
         User.create(line_id: line_id)
 
-        Prefectures.find_by(name: @message)
+        Prefecture.find_by(name: @message)
         # ④userデータを登録するときにprefectureテーブルのnameカラムに対して都道府県名で検索
 
-        INSERT INTO Users; Prefectures.new()
+        INSERT INTO Users; Prefecture.new()
         # ⑤都道府県名を取得できたらPrefecturesテーブルのidをUsersテーブルに保存
 
         # LINEお友達解除された場合（機能③）
