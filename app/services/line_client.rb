@@ -549,4 +549,10 @@ class LineClient
                   }
                 }
   end
+
+  def self.third_reply(prefecture)
+    { "type": "text",
+                 "text": "#{prefecture}で登録しました！試しに明日の天気を聞いてみましょう",
+                 }       
+  end
 end
