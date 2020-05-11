@@ -8,7 +8,7 @@ class LinebotController < ApplicationController
   protect_from_forgery :except => [:callback]
 
   def callback
-    @line_client = LineClient.new
+    # @line_client = LineClient.new  #この行いらない
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)

@@ -52,15 +52,3 @@ Prefecture.create(name: "大分", code: "44")
 Prefecture.create(name: "宮崎", code: "45")
 Prefecture.create(name: "鹿児島", code: "46")
 Prefecture.create(name: "沖縄", code: "47")
-
-# ①これを47こ登録
-
-# ②rails db:seedを実行
-
-# ③seedファイルに書かれているデータがdbに登録される
-
-# ④userデータを登録するときにprefectureテーブルのnameカラムに対して都道府県名で検索
-
-# ⑤都道府県名を取得できたらPrefecturesテーブルのidをUsersテーブルに保存
-
-# ⑥天気予報の情報を取得するには対象のユーザーの都道府県情報のcodeをurlに埋め込む(数字の部分)
