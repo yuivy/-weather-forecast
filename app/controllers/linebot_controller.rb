@@ -53,8 +53,8 @@ class LinebotController < ApplicationController
           # Prefectureモデルに該当するメッセージの場合に反応する
           when *prefectures.pluck(:name)
             prefecture = Prefecture.find_by(name: @message)
-            # message = LineClient.(prefecture.name)
-            # client.reply_message(event['replyToken'], message) 
+            message = LineClient.third_reply(prefecture.name)
+            client.reply_message(event['replyToken'], message) 
                       
             line_id = event['source']['userId']
             prefecture = Prefecture.find_by(name: @message)
