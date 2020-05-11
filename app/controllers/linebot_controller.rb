@@ -8,7 +8,7 @@ class LinebotController < ApplicationController
   protect_from_forgery :except => [:callback]
 
   def callback
-    @line_client = Service::LineClient.new
+    @line_client = LineClient.new
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
@@ -19,51 +19,57 @@ class LinebotController < ApplicationController
     # 作った都道府県データを変数に保存
     prefectures = Prefecture.all
     events.each { |event|
+      @message = event.message['text'].gsub(" ", "") 
       case event
         # メッセージが送信された場合の対応（機能①）
       when Line::Bot::Event::Message
+
         case event.type
           # ユーザーからテキスト形式のメッセージが送られて来た場合
         when Line::Bot::Event::MessageType::Text  #MessageType::Textの場合の処理
+          logger.debug(@message)
+          logger.debug("aaaaaaa")
           case @message #送信されたメッセージに応じて分岐させる
 
           when "北海道,東北"
-            message = @line_client.second_reply_hokkaido_tohoku
+            message = LineClient.second_reply_hokkaido_tohoku
             client.reply_message(event['replyToken'], message)
           when "関東"
-            message = @line_client.second_reply_kanto
+            message = LineClient.second_reply_kanto
             client.reply_message(event['replyToken'], message)
           when "北陸,甲信越"
-            message = @line_client.second_reply_hokuriku_koushinetsu
+            message = LineClient.second_reply_hokuriku_koushinetsu
             client.reply_message(event['replyToken'], message)
           when "東海,関西"
-            message = @line_client.second_reply_tokai_kansai
+            message = LineClient.second_reply_tokai_kansai
             client.reply_message(event['replyToken'], message)
           when "中国,四国"
-            message = @line_client.second_reply_chugoku_shikoku
+            message = LineClient.second_reply_chugoku_shikoku
             client.reply_message(event['replyToken'], message)
           when "九州,沖縄"
-            message = @line_client.second_reply_kyusyu_okinawa
+            message = LineClient.second_reply_kyusyu_okinawa
             client.reply_message(event['replyToken'], message)
 
           # Prefectureモデルに該当するメッセージの場合に反応する
           when *prefectures.pluck(:name)
             prefecture = Prefecture.find_by(name: @message)
-            message = @line_client.third_reply(prefecture.name)
-            client.reply_message(event['replyToken'], message) 
+            # message = LineClient.(prefecture.name)
+            # client.reply_message(event['replyToken'], message) 
                       
             line_id = event['source']['userId']
             prefecture = Prefecture.find_by(name: @message)
 
             user = User.find_by(line_id: line_id)
+            # updateが実行されていない
+            # prefectureとuserの中にlogを出力して中身がなにか確認する
             if prefecture && user
               user.update(prefecture_id: prefecture[:id])
             end
-
+            
           else
-            message = @line_client.first_reply
+            message = LineClient.first_reply
             client.reply_message(event['replyToken'], message)
-          end
+          end   
 
           # ユーザーからテキスト形式のメッセージが送られて来た場合
         when Line::Bot::Event::MessageType::Text
