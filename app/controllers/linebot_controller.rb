@@ -8,7 +8,6 @@ class LinebotController < ApplicationController
   protect_from_forgery :except => [:callback]
 
   def callback
-    # @line_client = LineClient.new  #この行いらない
     body = request.body.read
     signature = request.env['HTTP_X_LINE_SIGNATURE']
     unless client.validate_signature(body, signature)
@@ -27,7 +26,7 @@ class LinebotController < ApplicationController
         @message = event.message['text'].gsub(" ", "")
         case event.type
           # ユーザーからテキスト形式のメッセージが送られて来た場合
-        when Line::Bot::Event::MessageType::Text  #MessageType::Textの場合の処理 is 地方のメソッドを作る
+        when process_region  #MessageType::Textの場合の処理
           case @message #送信されたメッセージに応じて分岐させる
 
           when "北海道,東北"
@@ -61,7 +60,7 @@ class LinebotController < ApplicationController
             user = User.find_by(line_id: line_id)
 
             user.update(prefecture_id: prefecture.id) if prefecture.present? && user.present?
-          else #リプライフリーインプットメソッド切る
+          else #reply_free(input)メソッド切る #ユーザーが自由入力した時の処理
             # binding.pry
             message = LineClient.first_reply
             client.reply_message(event['replyToken'], message)
@@ -181,5 +180,9 @@ class LinebotController < ApplicationController
 
   def is_greetig(message)
     /.*(こんにちは|こんばんは|初めまして|はじめまして|おはよう).*/ === message
+  end
+
+  def process_region
+    Line::Bot::Event::MessageType::Text
   end
 end
