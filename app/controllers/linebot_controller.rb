@@ -50,7 +50,7 @@ class LinebotController < ApplicationController
             client.reply_message(event['replyToken'], message)
 
           # Prefectureモデルに該当するメッセージの場合に反応する
-          when *prefectures.pluck(:name) #is　都道府県でメソッド
+          when *prefectures.pluck(:name)
             prefecture = Prefecture.find_by(name: @message)
             message = LineClient.third_reply(prefecture.name)
             client.reply_message(event['replyToken'], message) 
@@ -79,7 +79,7 @@ class LinebotController < ApplicationController
           min_per = 30
           case input
             # 「明日」or「あした」というワードが含まれる場合
-          when /.*(明日|あした).*/
+          when tomorrow(input)
             # info[2]：明日の天気
             per06to12 = doc.elements[xpath + 'info[2]/rainfallchance/period[2]'].text
             per12to18 = doc.elements[xpath + 'info[2]/rainfallchance/period[3]'].text
@@ -91,7 +91,7 @@ class LinebotController < ApplicationController
               push =
                 "明日の天気？\n明日は雨が降らない予定だよ(^^)\nまた明日の朝の最新の天気予報で雨が降りそうだったら教えるね！"
             end
-          when /.*(明後日|あさって).*/
+          when day_after_tomorrow(input)
             per06to12 = doc.elements[xpath + 'info[3]/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info[3]/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info[3]/rainfallchance/period[4]l'].text
@@ -102,7 +102,7 @@ class LinebotController < ApplicationController
               push =
                 "明後日の天気？\n気が早いねー！何かあるのかな。\n明後日は雨は降らない予定だよ(^^)\nまた当日の朝の最新の天気予報で雨が降りそうだったら教えるからね！"
             end
-          when /.*(かわいい|可愛い|カワイイ|きれい|綺麗|キレイ|素敵|ステキ|すてき|面白い|おもしろい|ありがと|すごい|スゴイ|スゴい|好き|頑張|がんば|ガンバ).*/
+          when praise(input)
             push =
               "ありがとう！！！\n優しい言葉をかけてくれるあなたはとても素敵です(^^)"
           when is_greetig(input)
@@ -165,6 +165,18 @@ class LinebotController < ApplicationController
       config.channel_secret = ENV["LINE_CHANNEL_SECRET"]
       config.channel_token = ENV["LINE_CHANNEL_TOKEN"]
     }
+  end
+
+  def tomorrow(message)
+    /.*(明日|あした).*/ === message
+  end
+
+  def day_after_tomorrow(message)
+    /.*(明後日|あさって).*/ === message
+  end
+
+  def praise(message)
+    /.*(かわいい|可愛い|カワイイ|きれい|綺麗|キレイ|素敵|ステキ|すてき|面白い|おもしろい|ありがと|すごい|スゴイ|スゴい|好き|頑張|がんば|ガンバ).*/ === message
   end
 
   def is_greetig(message)
