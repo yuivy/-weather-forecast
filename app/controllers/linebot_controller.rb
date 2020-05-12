@@ -19,16 +19,15 @@ class LinebotController < ApplicationController
     # 作った都道府県データを変数に保存
     prefectures = Prefecture.all
     events.each { |event|
-      @message = event.message['text'].gsub(" ", "") 
+      # binding.pry
       case event
         # メッセージが送信された場合の対応（機能①）
       when Line::Bot::Event::Message
-
+        # binding.pry
+        @message = event.message['text'].gsub(" ", "")
         case event.type
           # ユーザーからテキスト形式のメッセージが送られて来た場合
-        when Line::Bot::Event::MessageType::Text  #MessageType::Textの場合の処理
-          logger.debug(@message)
-          logger.debug("aaaaaaa")
+        when Line::Bot::Event::MessageType::Text  #MessageType::Textの場合の処理 is 地方のメソッドを作る
           case @message #送信されたメッセージに応じて分岐させる
 
           when "北海道,東北"
@@ -51,22 +50,19 @@ class LinebotController < ApplicationController
             client.reply_message(event['replyToken'], message)
 
           # Prefectureモデルに該当するメッセージの場合に反応する
-          when *prefectures.pluck(:name)
+          when *prefectures.pluck(:name) #is　都道府県でメソッド
             prefecture = Prefecture.find_by(name: @message)
             message = LineClient.third_reply(prefecture.name)
             client.reply_message(event['replyToken'], message) 
-                      
+
             line_id = event['source']['userId']
             prefecture = Prefecture.find_by(name: @message)
 
             user = User.find_by(line_id: line_id)
-            # updateが実行されていない
-            # prefectureとuserの中にlogを出力して中身がなにか確認する
-            if prefecture && user
-              user.update(prefecture_id: prefecture[:id])
-            end
-            
-          else
+
+            user.update(prefecture_id: prefecture.id) if prefecture.present? && user.present?
+          else #リプライフリーインプットメソッド切る
+            # binding.pry
             message = LineClient.first_reply
             client.reply_message(event['replyToken'], message)
           end   
@@ -109,7 +105,7 @@ class LinebotController < ApplicationController
           when /.*(かわいい|可愛い|カワイイ|きれい|綺麗|キレイ|素敵|ステキ|すてき|面白い|おもしろい|ありがと|すごい|スゴイ|スゴい|好き|頑張|がんば|ガンバ).*/
             push =
               "ありがとう！！！\n優しい言葉をかけてくれるあなたはとても素敵です(^^)"
-          when /.*(こんにちは|こんばんは|初めまして|はじめまして|おはよう).*/
+          when is_greetig(input)
             push =
               "こんにちは。\n声をかけてくれてありがとう\n今日があなたにとっていい日になりますように(^^)"
           else
@@ -147,18 +143,16 @@ class LinebotController < ApplicationController
         # 登録したユーザーのidをユーザーテーブルに格納
         line_id = event['source']['userId']
         User.create(line_id: line_id)
+        # binding.pry
+        # 地域を聞く質問
+        message = LineClient::first_reply
+        client.reply_message(event['replyToken'], message)
 
-        Prefecture.find_by(name: @message)
-        # ④userデータを登録するときにprefectureテーブルのnameカラムに対して都道府県名で検索
-
-        INSERT INTO Users; Prefecture.new()
-        # ⑤都道府県名を取得できたらPrefecturesテーブルのidをUsersテーブルに保存
-
-        # LINEお友達解除された場合（機能③）
       when Line::Bot::Event::Unfollow
+        # binding.pry
         # お友達解除したユーザーのデータをユーザーテーブルから削除
         line_id = event['source']['userId']
-        User.find_by(line_id: line_id).destroy
+        User.find_by(line_id: line_id)&.destroy
       end
     }
     head :ok
@@ -171,5 +165,9 @@ class LinebotController < ApplicationController
       config.channel_secret = ENV["LINE_CHANNEL_SECRET"]
       config.channel_token = ENV["LINE_CHANNEL_TOKEN"]
     }
+  end
+
+  def is_greetig(message)
+    /.*(こんにちは|こんばんは|初めまして|はじめまして|おはよう).*/ === message
   end
 end
