@@ -41,14 +41,16 @@ class LinebotController < ApplicationController
           user = User.find_by(line_id: line_id)
 
           user.update(prefecture_id: prefecture.id) if prefecture.present? && user.present?
+
         else #reply_free(input)メソッド切る #ユーザーが自由入力した時の処理
-          # binding.pry
+          line_id = event['source']['userId']
+          user = User.find_by(line_id: line_id)
           # event.message['text']：ユーザーから送られたメッセージ
           input = event.message['text']
-          url  = "https://www.drk7.jp/weather/xml/13.xml"
+          url  = "https://www.drk7.jp/weather/xml/" + user.prefecture.id.to_s + ".xml"
           xml  = open( url ).read.toutf8
           doc = REXML::Document.new(xml)
-          xpath = 'weatherforecast/pref/area[4]/'
+          xpath = 'weatherforecast/pref/area[4]/' #user.prefecture.area
           # 当日朝のメッセージの送信の下限値は20％としているが、明日・明後日雨が降るかどうかの下限値は30％としている
           min_per = 30
           case input
@@ -83,6 +85,7 @@ class LinebotController < ApplicationController
             push =
               "こんにちは。\n声をかけてくれてありがとう\n今日があなたにとっていい日になりますように(^^)"
           else
+            binding.pry
             per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
@@ -104,6 +107,7 @@ class LinebotController < ApplicationController
             end
           end
         end
+        binding.pry
         message = {
           type: 'text',
           text: push
