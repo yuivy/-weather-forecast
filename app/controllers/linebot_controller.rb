@@ -25,7 +25,7 @@ class LinebotController < ApplicationController
         @message = event.message['text'].gsub(" ", "")
         case
           # ユーザーからテキスト形式のメッセージが送られて来た場合
-        when region?(@message)  #MessageType::Textの場合の処理
+        when region?(@message)
           # binding.pry
           message = LineClient.second_reply(@message)
           client.reply_message(event['replyToken'], message)
