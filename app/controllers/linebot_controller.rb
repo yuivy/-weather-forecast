@@ -17,23 +17,18 @@ class LinebotController < ApplicationController
 
     # 作った都道府県データを変数に保存
     events.each { |event|
-      # binding.pry
       case event
         # メッセージが送信された場合の対応（機能①）
       when Line::Bot::Event::Message
-        # binding.pry
         @message = event.message['text'].gsub(" ", "")
         case
           # ユーザーからテキスト形式のメッセージが送られて来た場合
         when region?(@message)
-          # binding.pry
           message = LineClient.second_reply(@message)
           client.reply_message(event['replyToken'], message)
-
         # Prefectureモデルに該当するメッセージの場合に反応する
         when prefecture?(@message)
           prefecture = Prefecture.find_by(name: @message)
-          # binding.pry
           message = LineClient.third_reply(prefecture.name)
           client.reply_message(event['replyToken'], message) 
 
@@ -42,20 +37,24 @@ class LinebotController < ApplicationController
 
           user.update(prefecture_id: prefecture.id) if prefecture.present? && user.present?
 
-        else #reply_free(input)メソッド切る #ユーザーが自由入力した時の処理
+        else #ユーザーが自由入力した時の処理
           line_id = event['source']['userId']
           user = User.find_by(line_id: line_id)
           # event.message['text']：ユーザーから送られたメッセージ
+          binding.pry
           input = event.message['text']
           url  = "https://www.drk7.jp/weather/xml/" + user.prefecture.id.to_s + ".xml"
           xml  = open( url ).read.toutf8
           doc = REXML::Document.new(xml)
-          xpath = 'user.prefecture.area'
+          xpath = user.prefecture.area
           # 当日朝のメッセージの送信の下限値は20％としているが、明日・明後日雨が降るかどうかの下限値は30％としている
           min_per = 30
+          binding.pry
           case input
             # 「明日」or「あした」というワードが含まれる場合
-          when tomorrow?(input)
+          # when tomorrow?(input) then
+          when "明日", "あした" then
+            binding.pry
             # info[2]：明日の天気
             per06to12 = doc.elements[xpath + 'info[2]/rainfallchance/period[2]'].text
             per12to18 = doc.elements[xpath + 'info[2]/rainfallchance/period[3]'].text
@@ -67,7 +66,8 @@ class LinebotController < ApplicationController
               push =
                 "明日の天気？\n明日は雨が降らない予定だよ(^^)\nまた明日の朝の最新の天気予報で雨が降りそうだったら教えるね！"
             end
-          when day_after_tomorrow?(input)
+          when day_after_tomorrow?(input) then
+            binding.pry
             per06to12 = doc.elements[xpath + 'info[3]/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info[3]/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info[3]/rainfallchance/period[4]l'].text
@@ -78,14 +78,14 @@ class LinebotController < ApplicationController
               push =
                 "明後日の天気？\n気が早いねー！何かあるのかな。\n明後日は雨は降らない予定だよ(^^)\nまた当日の朝の最新の天気予報で雨が降りそうだったら教えるからね！"
             end
-          when praise?(input)
+          when praise?(input) then
             push =
               "ありがとう！！！\n優しい言葉をかけてくれるあなたはとても素敵です(^^)"
-          when greetig?(input)
+          when greetig?(input) then
             push =
               "こんにちは。\n声をかけてくれてありがとう\n今日があなたにとっていい日になりますように(^^)"
           else
-            binding.pry
+            # binding.pry
             per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
@@ -93,7 +93,7 @@ class LinebotController < ApplicationController
               word =
                 ["雨だけど元気出していこうね！",
                  "雨に負けずファイト！！",
-                 "雨だけどああたの明るさでみんなを元気にしてあげて(^^)"].sample
+                 "雨だけどあなたの明るさでみんなを元気にしてあげて(^^)"].sample
               push =
                 "今日の天気？\n今日は雨が降りそうだから傘があった方が安心だよ。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
             else
@@ -108,7 +108,7 @@ class LinebotController < ApplicationController
           end
         end
         binding.pry
-        message = {
+        input = {
           type: 'text',
           text: push
         }
@@ -151,6 +151,7 @@ class LinebotController < ApplicationController
   end
 
   def day_after_tomorrow?(message)
+    binding.pry
     /.*(明後日|あさって).*/ === message
   end
 
