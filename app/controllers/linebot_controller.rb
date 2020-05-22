@@ -73,29 +73,31 @@ class LinebotController < ApplicationController
                 "明後日の天気？\n気が早いねー！何かあるのかな。\n明後日は雨は降らない予定だよ(^^)\nまた当日の朝の最新の天気予報で雨が降りそうだったら教えるからね！"
             end
           when *ConstractGroup.praise then
-            push = "ありがとう！！！\n優しい言葉をかけてくれるあなたはとても素敵です(^^)"
+            binding.pry
+            push = "ありがとう！！\n優しい言葉をかけてくれるあなたはとても素敵です(⁎˃ᴗ˂⁎)"
 
           when *ConstractGroup.greeting then
-            push = "こんにちは。\n声をかけてくれてありがとう\n今日があなたにとっていい日になりますように(^^)"
+            push = "こんにちは。\n声をかけてくれてありがとう！\n今日があなたにとっていい日になりますように(*^^*)"
           else
+            binding.pry
             per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
             if per06to12.to_i >= min_per || per12to18.to_i >= min_per || per18to24.to_i >= min_per
               word =
                 ["雨だけど元気出していこうね！",
-                 "雨に負けずファイト！！",
-                 "雨だけどあなたの明るさでみんなを元気にしてあげて(^^)"].sample
+                 "雨に負けずファイト(*ﾟ▽ﾟ)ﾉ",
+                 "雨だけどあなたの明るさでみんなを元気にしてあげて(๑•ω-๑)♥"].sample
               push =
                 "今日の天気？\n今日は雨が降りそうだから傘があった方が安心だよ。\n　  6〜12時　#{per06to12}％\n　12〜18時　 #{per12to18}％\n　18〜24時　#{per18to24}％\n#{word}"
             else
               word =
-                ["天気もいいから一駅歩いてみるのはどう？(^^)",
-                 "今日会う人のいいところを見つけて是非その人に教えてあげて(^^)",
-                 "素晴らしい一日になりますように(^^)",
-                 "雨が降っちゃったらごめんね(><)"].sample
+                ["天気もいいから出かけてみるのはどう？(*´ｰ`*)",
+                 "今日会う人のいいところを見つけて是非その人に教えてあげて(◦ˉ ˘ ˉ◦)",
+                 "素晴らしい一日になりますように(*•ω•*)",
+                 "雨が降っちゃったらごめんね(´тωт`)｡ﾟ"].sample
               push =
-                "今日の天気？\n今日は雨は降らなさそうだよ。\n#{word}"
+                "今日の天気？\n今日は雨は降らなさそうだよ！\n#{word}"
             end
           end
         end
@@ -120,7 +122,7 @@ class LinebotController < ApplicationController
 
       # テキスト以外（画像等）のメッセージが送られた場合
       else
-        push = "テキスト以外はわからないよ〜(；；)"
+        push = "テキスト以外はわからないよ( ᵕ_ᵕ̩̩ )"
       end
     }
     head :ok
