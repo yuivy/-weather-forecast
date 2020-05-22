@@ -73,13 +73,11 @@ class LinebotController < ApplicationController
                 "明後日の天気？\n気が早いねー！何かあるのかな。\n明後日は雨は降らない予定だよ(^^)\nまた当日の朝の最新の天気予報で雨が降りそうだったら教えるからね！"
             end
           when *ConstractGroup.praise then
-            binding.pry
             push = "ありがとう！！\n優しい言葉をかけてくれるあなたはとても素敵です(⁎˃ᴗ˂⁎)"
 
           when *ConstractGroup.greeting then
             push = "こんにちは。\n声をかけてくれてありがとう！\n今日があなたにとっていい日になりますように(*^^*)"
           else
-            binding.pry
             per06to12 = doc.elements[xpath + 'info/rainfallchance/period[2]l'].text
             per12to18 = doc.elements[xpath + 'info/rainfallchance/period[3]l'].text
             per18to24 = doc.elements[xpath + 'info/rainfallchance/period[4]l'].text
