@@ -22,3 +22,5 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+![雨降るか教えますLINEBot_QRcode](https://user-images.githubusercontent.com/62199768/83613415-b4911e00-a5be-11ea-91e5-51843cc6b7d9.png)
